@@ -124,20 +124,23 @@ import random
 def get_filtered_pool(elements):
     pool = []
     
+    # 오행별로 번호를 무작위로 뽑기
     for elem, score in elements.items():
         numbers = number_map[elem].copy()  # 오행에 맞는 숫자 리스트 복사
         
+        # 기운에 따른 뽑기 로직
         if score < 1.5:  # 기운 결핍
             pool += random.sample(numbers, 3)  # 3개를 무작위로 선택 (중복 없음)
         elif score > 3.5:  # 기운 과다
             pool += random.sample(numbers, 1)  # 1개를 무작위로 선택 (중복 없음)
         else:  # 기운 안정
             pool += random.sample(numbers, 2)  # 2개를 무작위로 선택 (중복 없음)
-    
-    # 랜덤 순서로 섞기
-    random.shuffle(pool)
-    
-    return pool
+
+    # 무작위로 뽑힌 숫자들을 정렬 (낮은 숫자부터)
+    pool = sorted(pool)
+
+    # 6개 숫자만 반환 (최대 6개로 제한)
+    return pool[:6]
 
 
 def generate_lotto_numbers(birthdate_str, birthtime_str=None, refdate_str=None):
