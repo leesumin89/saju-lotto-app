@@ -122,12 +122,14 @@ def count_elements(saju_chars):
 def get_filtered_pool(elements):
     pool = []
     for elem, score in elements.items():
+        numbers = number_map[elem].copy()
+        random.shuffle(numbers)
         if score < 1.5:
-            pool += number_map[elem][:3]
+            pool += numbers[:3]
         elif score > 3.5:
-            pool += number_map[elem][:1]
+            pool += numbers[:1]
         else:
-            pool += number_map[elem][:2]
+            pool += numbers[:2]
     return pool
 
 def generate_lotto_numbers(birthdate_str, birthtime_str=None, refdate_str=None):
