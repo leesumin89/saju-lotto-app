@@ -123,23 +123,33 @@ import random
 
 def get_filtered_pool(elements):
     pool = []
-    
-    # 각 오행별로 랜덤으로 숫자 뽑기
-    for elem, score in elements.items():
-        numbers = number_map[elem].copy()  # 해당 오행의 숫자 리스트 복사
-        random.shuffle(numbers)  # 숫자 리스트 섞기
-        
-        # 기운에 맞게 뽑을 개수 결정
-        if score < 1.5:  # 기운 결핍
-            pool += numbers[:3]  # 결핍된 오행에서 3개를 무작위로 선택
-        elif score > 3.5:  # 기운 과다
-            pool += numbers[:1]  # 과다된 오행에서 1개를 무작위로 선택
-        else:  # 기운 안정
-            pool += numbers[:2]  # 안정된 오행에서 2개를 무작위로 선택
 
-    # 최종적으로 6개의 숫자만 랜덤으로 뽑고 정렬하기
-    random.shuffle(pool)  # 전체 pool에서 랜덤으로 섞기
-    return sorted(pool[:6])  # 6개만 뽑아서 정렬 후 반환
+    # 상태 분류
+    deficient = [e for e, v in elements.items() if v < 1.5]
+    stable = [e for e, v in elements.items() if 1.5 <= v <= 3.4]
+    excessive = [e for e, v in elements.items() if v > 3.5]
+
+    # 1️⃣ 결핍이 존재하는 경우 → 결핍 오행만 대상으로 3개씩
+    if deficient:
+        for elem in deficient:
+            numbers = number_map[elem].copy()
+            pool += random.sample(numbers, 3)
+
+    # 2️⃣ 결핍이 없고 안정만 있는 경우 → 안정 오행에서 2개씩
+    elif stable:
+        for elem in stable:
+            numbers = number_map[elem].copy()
+            pool += random.sample(numbers, 2)
+
+    # 3️⃣ 과다만 존재하는 경우 → 가장 적게 과다한 오행 3개 선택 후 2개씩
+    else:
+        sorted_excessive = sorted(excessive, key=lambda e: elements[e])
+        for elem in sorted_excessive[:3]:
+            numbers = number_map[elem].copy()
+            pool += random.sample(numbers, 2)
+
+    # 최종 숫자 6개 무작위 선택 후 정렬
+    return sorted(random.sample(pool, 6))
 
 
 
