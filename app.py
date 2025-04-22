@@ -173,7 +173,7 @@ def generate_lotto_numbers(birthdate_str, birthtime_str=None, refdate_str=None):
     return sorted(number_pool[:6]), combined_elements, bool(birthtime_str), origin_trace
 
 # --- Streamlit 앱 ---
-st.title("🎯 천안 물주먹 이수민님의 로또 번호 생성기")
+st.markdown("### 🎯 천안 물주먹 이수민님의 로또 번호 생성기")
 
 st.markdown("""
 😎 당신의 생년월일과 기준일을 입력하면, 사주로 오행 기운을 분석해
