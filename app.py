@@ -119,53 +119,40 @@ def count_elements(saju_chars):
                     elements[element_map[stem]] += weights[i]
     return elements
 
-import random
-
-def get_filtered_pool(elements):
+def get_filtered_pool_dynamic(elements):
     pool = []
-
-    # 상태 분류
+    source_info = {}
     deficient = [e for e, v in elements.items() if v < 1.5]
     stable = [e for e, v in elements.items() if 1.5 <= v <= 3.4]
     excessive = [e for e, v in elements.items() if v > 3.5]
 
-    # 1️⃣ 결핍이 존재하는 경우 → 결핍 오행만 대상으로 3개씩
     if deficient:
         for elem in deficient:
-            numbers = number_map[elem].copy()
-            pool += random.sample(numbers, 3)
-
-    # 2️⃣ 결핍이 없고 안정만 있는 경우 → 안정 오행에서 2개씩
+            nums = random.sample(number_map[elem], 3)
+            pool += nums
+            source_info[elem] = nums
     elif stable:
         for elem in stable:
-            numbers = number_map[elem].copy()
-            pool += random.sample(numbers, 2)
-
-    # 3️⃣ 과다만 존재하는 경우 → 가장 적게 과다한 오행 3개 선택 후 2개씩
+            nums = random.sample(number_map[elem], 2)
+            pool += nums
+            source_info[elem] = nums
     else:
-        sorted_excessive = sorted(excessive, key=lambda e: elements[e])
-        for elem in sorted_excessive[:3]:
-            numbers = number_map[elem].copy()
-            pool += random.sample(numbers, 2)
+        selected = sorted(excessive, key=lambda e: elements[e])[:3]
+        for elem in selected:
+            nums = random.sample(number_map[elem], 2)
+            pool += nums
+            source_info[elem] = nums
 
-    # 최종 숫자 6개 무작위 선택 후 정렬
-    return sorted(random.sample(pool, 6))
-
-
+    final_numbers = sorted(random.sample(pool, 6))
+    return final_numbers, source_info
 
 def generate_lotto_numbers(birthdate_str, birthtime_str=None, refdate_str=None):
     saju_chars = get_saju_8char(birthdate_str, birthtime_str)
     today_elements = get_element_score_from_date(refdate_str) if refdate_str else {'木': 0, '火': 0, '土': 0, '金': 0, '水': 0}
     base_elements = count_elements(saju_chars)
     combined_elements = {e: base_elements[e] + today_elements[e] for e in base_elements}
-    filtered_pool = get_filtered_pool(combined_elements)
-    if len(filtered_pool) == 0:
-        return [], combined_elements, bool(birthtime_str)
-    if len(filtered_pool) < 6:
-        final_numbers = sorted(random.sample(filtered_pool, len(filtered_pool)))
-    else:
-        final_numbers = sorted(random.sample(filtered_pool, 6))
-    return final_numbers, combined_elements, bool(birthtime_str)
+    final_numbers, source_info = get_filtered_pool_dynamic(combined_elements)
+    return final_numbers, combined_elements, bool(birthtime_str), source_info
 
 # Streamlit 앱 UI
 st.markdown("## 🎯 이수민의 사주 기반 로또 번호 생성기")
@@ -187,7 +174,7 @@ if st.button("로또 번호 생성"):
     st.markdown("---")
     try:
         time_input = time if time.strip() else None
-        numbers, elements, used_time = generate_lotto_numbers(birth, time_input, ref)
+        numbers, elements, used_time, source_info = generate_lotto_numbers(birth, time_input, ref)
 
         st.subheader("📌 추천 로또 번호")
         st.markdown("🎱 " + ", ".join(str(n) for n in numbers))
@@ -199,6 +186,10 @@ if st.button("로또 번호 생성"):
         st.subheader("🧠 해석")
         for line in interpret_elements(elements).splitlines():
             st.markdown(line)
+
+        st.subheader("🎯 오행별 추출 숫자 출처")
+        for elem, nums in source_info.items():
+            st.markdown(f"- **{elem}**에서 추출된 숫자: {', '.join(map(str, nums))}")
 
         if used_time:
             st.success("🕒 시주까지 포함하여 사주 8자를 정밀 분석했습니다.")
