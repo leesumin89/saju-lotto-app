@@ -221,4 +221,4 @@ if st.button("로또 번호 생성"):
         else:
             st.info("⚠️ 출생 시간이 입력되지 않아 시주는 포함되지 않았습니다.")
 
-        st.markdown("\n👤 만든 사람: 이수민")
+            st.markdown("\n👤 만든 사람: 이수민")
