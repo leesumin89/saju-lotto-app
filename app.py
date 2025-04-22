@@ -186,6 +186,7 @@ st.markdown("""
 birth = st.text_input("🎂 생년월일 (예: 1989-12-08)")
 time = st.text_input("⏰ 출생 시간 (예: 07:25) - 생략 가능", "")
 ref = st.text_input("📅 기준 날짜 (예: 2025-04-21)")
+st.markdown("---")
 
 if st.button("로또 번호 생성"):
     st.subheader("🔍 입력 정보")
