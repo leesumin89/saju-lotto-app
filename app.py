@@ -198,14 +198,14 @@ if st.button("로또 번호 생성"):
         time_input = time if time.strip() else None
         numbers, elements, used_time, origin_trace = generate_lotto_numbers(birth, time_input, ref)
 
-        st.subheader("🎱 추천 로또 번호")
+        st.markdown("#### 🎱 추천 로또 번호")
         st.markdown(", ".join(map(str, numbers)))
 
-        st.subheader("📊 오행 분포")
+        st.markdown("#### 📊 오행 분포")
         for k in ['木', '火', '土', '金', '水']:
             st.markdown(f"- {k}: {round(elements[k], 2)}")
 
-        st.subheader("🧠 운세 해석")
+        st.markdown("#### 🧠 운세 해석")
         for line in interpret_elements(elements).splitlines():
             st.markdown(line)
 
