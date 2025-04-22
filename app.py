@@ -207,10 +207,19 @@ if st.button("로또 번호 생성"):
         for k in ['木', '火', '土', '金', '水']:
             score = round(elements[k], 2)
             msg = interpret_elements({k: elements[k]})
-            table_rows += f"<tr><td style='border: none;'><b>{k}: {score}</b></td><td style='padding-left: 16px; border: none;'>{msg}</td></tr>"
+            table_rows += f"<tr><td><b>{k}: {score}</b></td><td>{msg}</td></tr>"
 
         st.markdown(f"""
-        <table style='font-size: 16px; border-collapse: collapse; border: none;'>
+        <style>
+        table {{
+            border-collapse: collapse !important;
+            border-spacing: 0 !important;
+        }}
+        table, tr, td {{
+            border: none !important;
+        }}
+        </style>
+        <table style='font-size: 16px; margin-top: 8px;'>
             {table_rows}
         </table>
         """, unsafe_allow_html=True)
