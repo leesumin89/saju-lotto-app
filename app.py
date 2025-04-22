@@ -205,9 +205,12 @@ if st.button("로또 번호 생성"):
 
         table_rows = ""
         for k in ['木', '火', '土', '金', '水']:
-            score = round(elements[k], 2)
-            msg = interpret_elements({k: elements[k]})
-            table_rows += f"<tr><td><b>{k}: {score}</b></td><td>{msg}</td></tr>"
+            try:
+                score = round(float(elements[k]), 2)
+                msg = interpret_elements({k: elements[k]})
+                table_rows += f"<tr><td><b>{k}: {score}</b></td><td>{msg}</td></tr>"
+            except Exception as e:
+                table_rows += f"<tr><td><b>{k}</b></td><td>⚠️ 오류 발생: {e}</td></tr>"
 
         st.markdown(f"""
         <style>
