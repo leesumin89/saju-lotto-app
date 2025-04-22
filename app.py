@@ -70,81 +70,6 @@ def interpret_elements(elements):
             result.append(messages[elem]['mid'])
     return "\n".join(result)
 
-def get_ganzhi_from_date(date_str):
-    base_date = datetime.strptime("1984-02-02", "%Y-%m-%d")
-    target_date = datetime.strptime(date_str, "%Y-%m-%d")
-    diff = (target_date - base_date).days
-    stems = ['갑','을','병','정','무','기','경','신','임','계']
-    branches = ['자','축','인','묘','진','사','오','미','신','유','술','해']
-    return stems[diff % 10], branches[diff % 12]
-
-def get_element_score_from_date(date_str):
-    stem, branch = get_ganzhi_from_date(date_str)
-    score = {'木': 0, '火': 0, '土': 0, '金': 0, '水': 0}
-    if stem in element_map:
-        score[element_map[stem]] += 1
-    if branch in element_map:
-        score[element_map[branch]] += 1
-    return score
-
-def get_saju_8char(birth: str, time: Optional[str]):
-    dt = datetime.strptime(birth + (" " + time if time else ""), "%Y-%m-%d %H:%M" if time else "%Y-%m-%d")
-    stems = ['갑','을','병','정','무','기','경','신','임','계']
-    branches = ['자','축','인','묘','진','사','오','미','신','유','술','해']
-
-    ipchun = datetime(dt.year, 2, 4)
-    year = dt.year - 1 if dt < ipchun else dt.year
-    year_gz = get_ganzhi_from_date(f"{year}-01-01")
-
-    month_boundaries = [
-        (1, 6), (2, 4), (3, 6), (4, 5), (5, 6), (6, 6),
-        (7, 7), (8, 8), (9, 8), (10, 8), (11, 7), (12, 7)
-    ]
-    month_idx = 11
-    for i, (m, d) in enumerate(month_boundaries):
-        if dt < datetime(dt.year, m, d):
-            month_idx = (i - 1) % 12
-            break
-    month_ref = datetime(dt.year, *month_boundaries[month_idx])
-    month_gz = get_ganzhi_from_date(month_ref.strftime("%Y-%m-%d"))
-
-    day_gz = get_ganzhi_from_date(dt.strftime("%Y-%m-%d"))
-    saju = list(year_gz + month_gz + day_gz)
-
-    if time:
-        hour = dt.hour
-        day_stem = day_gz[0]
-        gan_map = {
-            '갑': ['갑','을','병','정','무','기','경','신','임','계','갑','을'],
-            '을': ['병','정','무','기','경','신','임','계','갑','을','병','정'],
-            '병': ['무','기','경','신','임','계','갑','을','병','정','무','기'],
-            '정': ['경','신','임','계','갑','을','병','정','무','기','경','신'],
-            '무': ['임','계','갑','을','병','정','무','기','경','신','임','계'],
-            '기': ['임','계','갑','을','병','정','무','기','경','신','임','계'],
-            '경': ['병','정','무','기','경','신','임','계','갑','을','병','정'],
-            '신': ['무','기','경','신','임','계','갑','을','병','정','무','기'],
-            '임': ['경','신','임','계','갑','을','병','정','무','기','경','신'],
-            '계': ['갑','을','병','정','무','기','경','신','임','계','갑','을']
-        }
-        hour_block = 0 if hour in [23, 0] else ((hour + 1) // 2) % 12
-        hour_branch = branches[hour_block]
-        hour_stem = gan_map.get(day_stem, stems)[hour_block]
-        saju += [hour_stem, hour_branch]
-
-    return saju
-
-def count_elements(saju_chars):
-    elements = {'木': 0, '火': 0, '土': 0, '金': 0, '水': 0}
-    weights = [0.6, 0.3, 0.1]
-    for char in saju_chars:
-        if char in element_map:
-            elements[element_map[char]] += 1
-        elif char in zodiac_storage:
-            for i, stem in enumerate(zodiac_storage[char]):
-                if stem in element_map:
-                    elements[element_map[stem]] += weights[i]
-    return elements
-
 def generate_lotto_numbers(birthdate_str, birthtime_str=None, refdate_str=None):
     saju_chars = get_saju_8char(birthdate_str, birthtime_str)
     today_elements = get_element_score_from_date(refdate_str) if refdate_str else {'木': 0, '火': 0, '土': 0, '金': 0, '水': 0}
@@ -152,16 +77,27 @@ def generate_lotto_numbers(birthdate_str, birthtime_str=None, refdate_str=None):
     combined_elements = {e: base_elements[e] + today_elements[e] for e in base_elements}
 
     avg = sum(combined_elements.values()) / 5
-    target_elements = sorted([e for e in combined_elements if combined_elements[e] < avg], key=lambda x: combined_elements[x])
+    weights = {}
+    for e, score in combined_elements.items():
+        if score < avg:
+            weights[e] = avg - score + 1.0
+        else:
+            weights[e] = 0.5
 
-    pool = []
-    for e in target_elements:
-        numbers = number_map[e].copy()
-        random.shuffle(numbers)
-        pool += numbers[:3]
+    total_weight = sum(weights.values())
+    proportions = {e: weights[e] / total_weight for e in weights}
 
-    random.shuffle(pool)
-    return sorted(pool[:6]), combined_elements, bool(birthtime_str)
+    number_pool = []
+    origin_trace = []
+    for e in proportions:
+        count = round(proportions[e] * 10)
+        pool = number_map[e].copy()
+        random.shuffle(pool)
+        number_pool.extend(pool[:count])
+        origin_trace.append((e, count, pool[:count]))
+
+    random.shuffle(number_pool)
+    return sorted(number_pool[:6]), combined_elements, bool(birthtime_str), origin_trace
 
 # --- Streamlit 앱 ---
 st.title("🎯 천기누설급 로또 번호 생성기")
@@ -187,7 +123,7 @@ if st.button("로또 번호 생성"):
 
     try:
         time_input = time if time.strip() else None
-        numbers, elements, used_time = generate_lotto_numbers(birth, time_input, ref)
+        numbers, elements, used_time, origin_trace = generate_lotto_numbers(birth, time_input, ref)
 
         st.subheader("🎱 추천 로또 번호")
         st.markdown(", ".join(map(str, numbers)))
@@ -199,6 +135,17 @@ if st.button("로또 번호 생성"):
         st.subheader("🧠 운세 해석")
         for line in interpret_elements(elements).splitlines():
             st.markdown(line)
+
+        st.subheader("🌈 선택된 숫자들의 운세 배경")
+        lotto_msg_templates = [
+            "- 오늘 당신의 사주에서 **'{e}'의 기운이 특히 약했습니다**. 그 부족한 운을 보완하기 위해 아래 숫자들이 선택됐어요: {nums} ({count}개)",
+            "- '{e}'의 기운이 살짝 모자라네요. 이 숫자들이 그 공백을 채워줄 거예요: {nums} ({count}개)",
+            "- 사주의 균형을 맞추기 위해 '{e}'의 기운이 필요한 하루입니다. 그래서 이 숫자들이 뽑혔어요: {nums}",
+            "- '{e}'의 흐름이 약해 기운의 흐름이 막히고 있어요. 이 숫자들로 흐름을 다시 열어보세요: {nums}"
+        ]
+        for e, count, nums in origin_trace:
+            msg = random.choice(lotto_msg_templates).format(e=e, count=count, nums=', '.join(map(str, nums)))
+            st.markdown(msg)
 
         st.markdown("---")
         if used_time:
