@@ -201,15 +201,19 @@ if st.button("로또 번호 생성"):
         st.markdown("#### 🎱 추천 로또 번호")
         st.markdown(", ".join(map(str, numbers)))
 
-        st.markdown("#### 📊 오행 분포 및 운세 해석")
+        st.markdown("#### 📊 오행 분포 및 운세 해석", unsafe_allow_html=True)
+
+        table_rows = ""
         for k in ['木', '火', '土', '金', '水']:
             score = round(elements[k], 2)
             msg = interpret_elements({k: elements[k]})
-            col1, col2 = st.columns([2, 4])
-            with col1:
-                st.markdown(f"**{k}: {score}**")
-            with col2:
-                st.markdown(msg)
+            table_rows += f"<tr><td><b>{k}: {score}</b></td><td style='padding-left: 20px'>{msg}</td></tr>"
+
+        st.markdown(f"""
+        <table style='font-size: 16px;'>
+            {table_rows}
+        </table>
+        """, unsafe_allow_html=True)
 
         st.markdown("---")
         if used_time:
