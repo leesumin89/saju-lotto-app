@@ -34,15 +34,53 @@ number_map = {
 def interpret_elements(elements):
     result = []
     for elem, score in elements.items():
-        if score == 0:
-            result.append(f"⚠️ {elem} 기운이 완전히 결핍되어 있음 → 이 영역에 주의 필요")
-        elif score < 1.5:
-            result.append(f"🔹 {elem} 기운이 약함 → 관련된 운(행동/재물/감정 등)이 약할 수 있음")
-        elif score >= 3.5:
-            result.append(f"🔥 {elem} 기운이 과다 → 과한 에너지로 인한 불균형 가능")
-        else:
-            result.append(f"✅ {elem} 기운이 안정됨 → 이 기운과 관련된 영역이 조화로움")
+        if elem == '木':
+            if score == 0:
+                result.append("🌑 木: 나무가 시들고 있습니다… 당신의 시작과 기획이 막히고 있군요.")
+            elif score < 1.5:
+                result.append("🍃 木: 희망의 싹이 약합니다. 조금 더 인내가 필요합니다.")
+            elif score >= 3.5:
+                result.append("🌪️ 木: 가지가 너무 자랐습니다. 방향을 잃은 욕심은 재앙이 됩니다.")
+            else:
+                result.append("🌿 木: 당신의 발밑에서 뿌리가 자라고 있습니다. 새로운 운이 트입니다.")
+        elif elem == '火':
+            if score == 0:
+                result.append("❄️ 火: 불이 꺼졌습니다. 열정과 재물운이 얼어붙고 있군요.")
+            elif score < 1.5:
+                result.append("🔥 火: 불씨는 있지만 아직 약합니다. 불을 살려야 할 시기입니다.")
+            elif score >= 3.5:
+                result.append("☄️ 火: 너무 강한 불은 모든 걸 태웁니다… 충돌을 피하세요.")
+            else:
+                result.append("🔥 火: 불꽃이 당신의 안에서 타오릅니다. 재물과 명예의 운이 깨어납니다.")
+        elif elem == '土':
+            if score == 0:
+                result.append("🕳️ 土: 기반이 약합니다. 사람을 믿지 마세요. 중심이 흔들립니다.")
+            elif score < 1.5:
+                result.append("🏚️ 土: 발 아래가 불안정합니다. 신중함이 필요한 시기입니다.")
+            elif score >= 3.5:
+                result.append("🪨 土: 너무 무겁습니다. 책임, 의무, 스트레스가 폭발할 수 있습니다.")
+            else:
+                result.append("⛰️ 土: 땅이 단단합니다. 신뢰와 기회가 쌓이는 시기입니다.")
+        elif elem == '金':
+            if score == 0:
+                result.append("🛠️ 金: 무기가 없습니다. 판단력이 흐려지고 있습니다.")
+            elif score < 1.5:
+                result.append("🔪 金: 검은 있지만 날이 무디군요. 냉정함이 필요합니다.")
+            elif score >= 3.5:
+                result.append("⚔️ 金: 과한 날카로움은 상처를 남깁니다. 분열 주의.")
+            else:
+                result.append("💎 金: 당신 안의 칼날이 빛나고 있습니다. 결정의 순간입니다.")
+        elif elem == '水':
+            if score == 0:
+                result.append("🫗 水: 물이 마릅니다. 감정, 지혜, 인연이 끊기려 합니다.")
+            elif score < 1.5:
+                result.append("💧 水: 감정이 메마르고 흐름이 막히고 있습니다.")
+            elif score >= 3.5:
+                result.append("🌊 水: 홍수가 몰려옵니다. 감정 폭발과 혼란에 주의하세요.")
+            else:
+                result.append("🌊 水: 당신의 운이 흐릅니다. 지혜와 감정이 조화를 이룹니다.")
     return "\n".join(result)
+
 
 def get_ganzhi_from_date(date_str):
     base_date = datetime.strptime("1984-02-02", "%Y-%m-%d")
