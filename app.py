@@ -201,14 +201,20 @@ if st.button("로또 번호 생성"):
         st.markdown("#### 🎱 추천 로또 번호")
         st.markdown(", ".join(map(str, numbers)))
 
-        st.markdown("#### 📊 오행 분포")
-        for k in ['木', '火', '土', '金', '水']:
-            st.markdown(f"- {k}: {round(elements[k], 2)}")
+        # 👉 오행 분포 & 운세 해석 좌우 배치
+        col1, col2 = st.columns(2)
 
-        st.markdown("#### 🧠 운세 해석")
-        for line in interpret_elements(elements).splitlines():
-            st.markdown(line)
+        with col1:
+            st.markdown("#### 📊 오행 분포")
+            for k in ['木', '火', '土', '金', '水']:
+                st.markdown(f"- {k}: {round(elements[k], 2)}")
 
+        with col2:
+            st.markdown("#### 🧠 운세 해석")
+            for line in interpret_elements(elements).splitlines():
+                st.markdown(line)
+
+        # ✅ 이건 두 컬럼 밖, 전체 출력 마무리
         st.markdown("---")
         if used_time:
             st.success("🕒 시주까지 포함하여 사주 8자를 정밀 분석했습니다.")
@@ -216,5 +222,3 @@ if st.button("로또 번호 생성"):
             st.info("⚠️ 출생 시간이 입력되지 않아 시주는 포함되지 않았습니다.")
 
         st.markdown("\n👤 만든 사람: 이수민")
-    except Exception as e:
-        st.error(f"❌ 오류 발생: {e}")
