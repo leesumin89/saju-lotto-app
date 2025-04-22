@@ -186,7 +186,6 @@ st.markdown("""
 birth = st.text_input("🎂 생년월일 (예: 1989-12-08)")
 time = st.text_input("⏰ 출생 시간 (예: 07:25) - 생략 가능", "")
 ref = st.text_input("📅 기준 날짜 (예: 2025-04-21)")
-st.markdown("---")
 
 if st.button("로또 번호 생성"):
     st.subheader("🔍 입력 정보")
@@ -208,10 +207,10 @@ if st.button("로또 번호 생성"):
         for k in ['木', '火', '土', '金', '水']:
             score = round(elements[k], 2)
             msg = interpret_elements({k: elements[k]})
-            table_rows += f"<tr><td><b>{k}: {score}</b></td><td style='padding-left: 20px'>{msg}</td></tr>"
+            table_rows += f"<tr><td style='border: none;'><b>{k}: {score}</b></td><td style='padding-left: 16px; border: none;'>{msg}</td></tr>"
 
         st.markdown(f"""
-        <table style='font-size: 16px;'>
+        <table style='font-size: 16px; border-collapse: collapse; border: none;'>
             {table_rows}
         </table>
         """, unsafe_allow_html=True)
