@@ -205,7 +205,7 @@ if st.button("로또 번호 생성"):
         for k in ['木', '火', '土', '金', '水']:
             score = round(elements[k], 2)
             msg = interpret_elements({k: elements[k]})
-            col1, col2 = st.columns([1, 5])
+            col1, col2 = st.columns([1.2, 4])
             with col1:
                 st.markdown(f"**{k}: {score}**")
             with col2:
